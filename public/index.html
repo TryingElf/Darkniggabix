@@ -1,13 +1,106 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="ca">
 <head>
-  <title>Express</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Niggi Bix - E-commerce Marketplace</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
-
 <body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
-</body>
+  <!-- Skip link for keyboard navigation -->
+  <a href="#main-content" class="skip-link">Salta al contingut principal</a>
 
+  <!-- Header accessible -->
+  <header role="banner" class="header">
+    <div class="container">
+      <h1>DARK NIGGI BIX</h1>
+      <p class="subtitle">Secure Underground Marketplace</p>
+    </div>
+  </header>
+
+  <!-- Navigation accessible -->
+  <nav role="navigation" aria-label="Navegació principal" class="nav">
+    <div class="container">
+      <ul class="nav-list">
+        <li><button class="nav-btn active" data-section="weapons" aria-label="Mostrar secció d'armes">WEAPONS</button></li>
+        <li><button class="nav-btn" data-section="drugs" aria-label="Mostrar secció de drogues">DRUGS</button></li>
+        <li><button class="nav-btn" data-section="organs" aria-label="Mostrar secció d'òrgans">ORGANS</button></li>
+        <li><button class="nav-btn" id="cart-btn" aria-label="Obrir carret de compra (0 items)">CART [<span id="cart-count">0</span>]</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main id="main-content" role="main" class="main">
+    <div class="container">
+      
+      <!-- WEAPONS SECTION -->
+      <section id="weapons-section" class="section active" aria-labelledby="weapons-title">
+        <h2 id="weapons-title">WEAPONS</h2>
+        <div id="weapons-container" class="products-grid" role="region" aria-live="polite" aria-label="Llista de productes d'armes">
+          <!-- Cards loaded by JavaScript -->
+        </div>
+      </section>
+
+      <!-- DRUGS SECTION -->
+      <section id="drugs-section" class="section" aria-labelledby="drugs-title">
+        <h2 id="drugs-title">DRUGS</h2>
+        <div id="drugs-container" class="products-grid" role="region" aria-live="polite" aria-label="Llista de productes de drogues">
+          <!-- Cards loaded by JavaScript -->
+        </div>
+      </section>
+
+      <!-- ORGANS SECTION -->
+      <section id="organs-section" class="section" aria-labelledby="organs-title">
+        <h2 id="organs-title">ORGANS</h2>
+        <div id="organs-container" class="products-grid" role="region" aria-live="polite" aria-label="Llista de productes d'òrgans">
+          <!-- Cards loaded by JavaScript -->
+        </div>
+      </section>
+
+      <!-- CART SECTION (hidden by default) -->
+      <section id="cart-section" class="section" aria-labelledby="cart-title">
+        <h2 id="cart-title">SHOPPING CART</h2>
+        <div id="cart-container" role="region" aria-live="polite" aria-label="Detalls del carret de compra">
+          <p class="empty-cart">El carret està buit</p>
+        </div>
+        <div class="cart-summary">
+          <p>Total: <strong id="cart-total">$0.00</strong></p>
+          <button id="checkout-btn" class="btn btn-primary" aria-label="Proceed to checkout" disabled>CHECKOUT</button>
+          <button id="clear-cart-btn" class="btn btn-secondary" aria-label="Clear shopping cart" disabled>CLEAR CART</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Notificació accessible (ARIA live region) -->
+  <div id="notification" class="notification" role="status" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Modal de quantitat de drogues -->
+  <div id="quantity-modal" class="modal" role="dialog" aria-labelledby="quantity-modal-title" aria-hidden="true">
+    <div class="modal-content">
+      <h3 id="quantity-modal-title">SELECT QUANTITY (GRAMS)</h3>
+      <div id="quantity-modal-body">
+        <div style="margin: 20px 0;">
+          <label for="quantity-input" style="color: #00cc00; display: block; margin-bottom: 10px;">Grams:</label>
+          <input type="number" id="quantity-input" min="1" max="2000" value="10" style="width: 100%; padding: 10px; background: #000000; color: #00cc00; border: 1px solid #00cc00; font-family: 'Courier New', monospace;">
+          <p style="color: #666666; margin-top: 10px; font-size: 0.85em;">Total: <span id="quantity-total">$800.00</span></p>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-primary" onclick="confirmQuantity()" style="flex: 1;">CONFIRM</button>
+          <button class="btn btn-secondary" onclick="closeQuantityModal()" style="flex: 1;">CANCEL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer role="contentinfo" class="footer">
+    <div class="container">
+      <p>&copy; 2026 Dark Web Market. Simulació educativa. Tots els drets reservats.</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
 </html>
