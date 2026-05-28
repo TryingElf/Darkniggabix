@@ -1,0 +1,43 @@
+nav {
+  display: flex;
+  gap: 0;
+  padding: 0.6rem 2rem;
+  background: #020202;
+}
+
+button {
+  padding: 0.5rem 1.4rem;
+  border: 1px solid #1c0000;
+  border-radius: 0;
+  background: transparent;
+  color: #555;
+  font-size: 0.78rem;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+button + button {
+  border-left: none;
+}
+
+button:hover {
+  background: #0d0000;
+  border-color: #440000;
+  color: #cc0000;
+}
+
+button.active {
+  background: #180000;
+  border-color: #cc0000;
+  color: #cc0000;
+  border-bottom: 1px solid #cc0000;
+}
+
+button:focus-visible {
+  outline: 2px solid #cc0000;
+  outline-offset: -2px;
+}

@@ -21,4 +21,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/products', productsRouter);
 
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
+
 module.exports = app;

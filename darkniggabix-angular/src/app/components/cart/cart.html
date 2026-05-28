@@ -1,0 +1,133 @@
+@if (orderResult()) {
+
+  <section class="order-confirm" aria-labelledby="order-title">
+    <div class="order-header">
+      <p class="order-status" id="order-title">// COMANDA PROCESSADA</p>
+      <p class="order-ref">REF: {{ orderResult()!.ref }}</p>
+      <p class="order-ts">{{ orderDate() | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+    </div>
+
+    <div class="table-wrapper" role="region" aria-label="Resum de la comanda">
+      <table>
+        <caption class="sr-only">Articles de la comanda {{ orderResult()!.ref }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Producte</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Qtd</th>
+            <th scope="col">Preu unit.</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of orderResult()!.items; track item.id) {
+            <tr>
+              <td>{{ item.product_name }}</td>
+              <td class="cat">{{ item.category }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unit_price | currency:'EUR':'symbol':'1.2-2' }}</td>
+              <td>{{ item.total_price | currency:'EUR':'symbol':'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <th scope="row" colspan="4">TOTAL</th>
+            <td class="total-amount">{{ orderResult()!.total | currency:'EUR':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <button class="btn-new-order" (click)="newOrder()">+ NOVA COMANDA</button>
+  </section>
+
+} @else {
+
+  <section aria-labelledby="cart-title">
+    <div class="toolbar">
+      <h2 id="cart-title">Carrito de la compra</h2>
+      @if (cartService.items().length > 0) {
+        <button class="btn-clear" (click)="clearCart()" aria-label="Buidar tot el carrito">
+          BUIDAR
+        </button>
+      }
+    </div>
+
+    @if (cartService.items().length === 0) {
+      <p class="empty-msg">El carrito és buit. Afegeix productes des de les altres seccions.</p>
+    } @else {
+      <div class="table-wrapper" role="region" aria-label="Articles al carrito">
+        <table>
+          <caption class="sr-only">Articles del carrito</caption>
+          <thead>
+            <tr>
+              <th scope="col">Producte</th>
+              <th scope="col">Categoria</th>
+              <th scope="col">Qtd</th>
+              <th scope="col">Preu unit.</th>
+              <th scope="col">Total</th>
+              <th scope="col">Treure</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of cartService.items(); track item.id) {
+              <tr>
+                <td>{{ item.product_name }}</td>
+                <td class="cat">{{ item.category }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unit_price | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td>{{ item.total_price | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td>
+                  <button
+                    class="btn-danger-sm"
+                    (click)="removeItem(item.id, item.product_name)"
+                    [attr.aria-label]="'Treure ' + item.product_name + ' del carrito'"
+                  >
+                    DEL
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <th scope="row" colspan="5">TOTAL</th>
+              <td class="total-amount">{{ cartService.total() | currency:'EUR':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="checkout-bar">
+        <span class="item-count">{{ cartService.count() }} article(s)</span>
+        <button
+          class="btn-checkout"
+          (click)="showConfirm.set(true)"
+          [disabled]="ordering()"
+          aria-label="Finalitzar i confirmar la compra"
+        >
+          {{ ordering() ? 'PROCESSANT...' : 'FINALITZAR COMANDA' }}
+        </button>
+      </div>
+    }
+  </section>
+
+  @if (showConfirm()) {
+    <div class="overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="confirm-box">
+        <p class="confirm-title" id="confirm-title">// CONFIRMAR COMANDA</p>
+        <p class="confirm-summary">
+          {{ cartService.count() }} article(s) &nbsp;&mdash;&nbsp;
+          {{ cartService.total() | currency:'EUR':'symbol':'1.2-2' }}
+        </p>
+        <p class="confirm-warn">! Aquesta acció reduirà l'estoc. No es pot desfer.</p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" (click)="showConfirm.set(false)">CANCEL·LAR</button>
+          <button class="btn-confirm" (click)="confirmOrder()">CONFIRMAR</button>
+        </div>
+      </div>
+    </div>
+  }
+
+}

@@ -3,103 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dark Niggi Bix - E-commerce Marketplace</title>
+  <title>Darkniggabix — Panell d'Administració</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body>
-  <!-- Skip link for keyboard navigation -->
-  <a href="#main-content" class="skip-link">Salta al contingut principal</a>
 
-  <!-- Header accessible -->
-  <header role="banner" class="header">
-    <div class="container">
-      <h1>DARK NIGGI BIX</h1>
-      <p class="subtitle">Secure Underground Marketplace</p>
-    </div>
+  <a href="#main" class="skip-link">Saltar al contingut principal</a>
+
+  <header>
+    <p class="site-title"><span>[</span> DARKNIGGABIX <span>]</span> &mdash; PANELL D'ADMINISTRACI&Oacute;</p>
+    <nav role="tablist" aria-label="Navegació per seccions">
+      <button role="tab" class="nav-btn active" data-section="weapons" aria-selected="true">ARMES</button>
+      <button role="tab" class="nav-btn" data-section="drugs" aria-selected="false">DROGUES</button>
+      <button role="tab" class="nav-btn" data-section="organs" aria-selected="false">ORGANS</button>
+      <button role="tab" class="nav-btn" data-section="orders" aria-selected="false">COMANDES</button>
+    </nav>
   </header>
 
-  <!-- Navigation accessible -->
-  <nav role="navigation" aria-label="Navegació principal" class="nav">
-    <div class="container">
-      <ul class="nav-list">
-        <li><button class="nav-btn active" data-section="weapons" aria-label="Mostrar secció d'armes">WEAPONS</button></li>
-        <li><button class="nav-btn" data-section="drugs" aria-label="Mostrar secció de drogues">DRUGS</button></li>
-        <li><button class="nav-btn" data-section="organs" aria-label="Mostrar secció d'òrgans">ORGANS</button></li>
-        <li><button class="nav-btn" id="cart-btn" aria-label="Obrir carret de compra (0 items)">CART [<span id="cart-count">0</span>]</button></li>
-      </ul>
-    </div>
-  </nav>
+  <main id="main" tabindex="-1">
 
-  <!-- Main content -->
-  <main id="main-content" role="main" class="main">
-    <div class="container">
-      
-      <!-- WEAPONS SECTION -->
-      <section id="weapons-section" class="section active" aria-labelledby="weapons-title">
-        <h2 id="weapons-title">WEAPONS</h2>
-        <div id="weapons-container" class="products-grid" role="region" aria-live="polite" aria-label="Llista de productes d'armes">
-          <!-- Cards loaded by JavaScript -->
-        </div>
-      </section>
+    <!-- ARMES -->
+    <section id="weapons-section" class="section" aria-labelledby="weapons-title">
+      <div class="toolbar">
+        <h2 id="weapons-title">Armes</h2>
+        <button class="btn-new" onclick="toggleForm('weapons')" aria-expanded="false" aria-controls="weapons-form">+ NOU REGISTRE</button>
+      </div>
+      <div id="weapons-form" class="form-card" hidden>
+        <form onsubmit="submitAdd(event,'weapons')">
+          <div class="form-grid">
+            <div class="field"><label for="w-name">Nom *</label><input id="w-name" name="name" type="text" required></div>
+            <div class="field"><label for="w-size">Mida *</label><input id="w-size" name="size" type="text" required></div>
+            <div class="field"><label for="w-bullet">Tipus bala *</label><input id="w-bullet" name="bullet_type" type="text" required></div>
+            <div class="field"><label for="w-price">Preu (€) *</label><input id="w-price" name="price" type="number" step="0.01" min="0.01" required></div>
+            <div class="field"><label for="w-stock">Stock *</label><input id="w-stock" name="stock" type="number" min="0" required></div>
+            <div class="field"><label for="w-img">Imatge (URL)</label><input id="w-img" name="image" type="text"></div>
+          </div>
+          <button type="submit" class="btn-primary">CONFIRMAR</button>
+          <button type="button" class="btn-cancel" onclick="toggleForm('weapons')">CANCEL·LAR</button>
+        </form>
+      </div>
+      <div class="table-wrapper">
+        <table aria-label="Llista d'armes">
+          <thead><tr><th scope="col">NOM</th><th scope="col">MIDA / BALA</th><th scope="col">PREU</th><th scope="col">STOCK</th><th scope="col">ACCIONS</th></tr></thead>
+          <tbody id="weapons-tbody"><tr><td colspan="5" class="loading-msg">&gt; Carregant...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-      <!-- DRUGS SECTION -->
-      <section id="drugs-section" class="section" aria-labelledby="drugs-title">
-        <h2 id="drugs-title">DRUGS</h2>
-        <div id="drugs-container" class="products-grid" role="region" aria-live="polite" aria-label="Llista de productes de drogues">
-          <!-- Cards loaded by JavaScript -->
-        </div>
-      </section>
+    <!-- DROGUES -->
+    <section id="drugs-section" class="section" hidden aria-labelledby="drugs-title">
+      <div class="toolbar">
+        <h2 id="drugs-title">Drogues</h2>
+        <button class="btn-new" onclick="toggleForm('drugs')" aria-expanded="false" aria-controls="drugs-form">+ NOU REGISTRE</button>
+      </div>
+      <div id="drugs-form" class="form-card" hidden>
+        <form onsubmit="submitAdd(event,'drugs')">
+          <div class="form-grid">
+            <div class="field"><label for="d-name">Nom *</label><input id="d-name" name="name" type="text" required></div>
+            <div class="field"><label for="d-desc">Descripció</label><input id="d-desc" name="description" type="text"></div>
+            <div class="field"><label for="d-price">Preu/gram (€) *</label><input id="d-price" name="price_per_gram" type="number" step="0.01" min="0.01" required></div>
+            <div class="field"><label for="d-maxg">Màxim grams *</label><input id="d-maxg" name="max_grams" type="number" min="1" required></div>
+            <div class="field"><label for="d-stock">Stock *</label><input id="d-stock" name="stock" type="number" min="0" required></div>
+            <div class="field"><label for="d-img">Imatge (URL)</label><input id="d-img" name="image" type="text"></div>
+          </div>
+          <button type="submit" class="btn-primary">CONFIRMAR</button>
+          <button type="button" class="btn-cancel" onclick="toggleForm('drugs')">CANCEL·LAR</button>
+        </form>
+      </div>
+      <div class="table-wrapper">
+        <table aria-label="Llista de drogues">
+          <thead><tr><th scope="col">NOM</th><th scope="col">DESCRIPCIÓ</th><th scope="col">PREU/g</th><th scope="col">STOCK</th><th scope="col">ACCIONS</th></tr></thead>
+          <tbody id="drugs-tbody"><tr><td colspan="5" class="loading-msg">&gt; Carregant...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-      <!-- ORGANS SECTION -->
-      <section id="organs-section" class="section" aria-labelledby="organs-title">
-        <h2 id="organs-title">ORGANS</h2>
-        <div id="organs-container" class="products-grid" role="region" aria-live="polite" aria-label="Llista de productes d'òrgans">
-          <!-- Cards loaded by JavaScript -->
-        </div>
-      </section>
+    <!-- ORGANS -->
+    <section id="organs-section" class="section" hidden aria-labelledby="organs-title">
+      <div class="toolbar">
+        <h2 id="organs-title">Organs</h2>
+        <button class="btn-new" onclick="toggleForm('organs')" aria-expanded="false" aria-controls="organs-form">+ NOU REGISTRE</button>
+      </div>
+      <div id="organs-form" class="form-card" hidden>
+        <form onsubmit="submitAdd(event,'organs')">
+          <div class="form-grid">
+            <div class="field"><label for="o-name">Nom *</label><input id="o-name" name="name" type="text" required></div>
+            <div class="field"><label for="o-health">Estat salut *</label><input id="o-health" name="health_status" type="text" required></div>
+            <div class="field"><label for="o-price">Preu (€) *</label><input id="o-price" name="price" type="number" step="0.01" min="0.01" required></div>
+            <div class="field"><label for="o-stock">Stock *</label><input id="o-stock" name="stock" type="number" min="0" required></div>
+            <div class="field"><label for="o-weight">Pes (kg)</label><input id="o-weight" name="weight" type="number" step="0.1" min="0"></div>
+            <div class="field"><label for="o-qty">Quantitat</label><input id="o-qty" name="quantity" type="number" min="1"></div>
+            <div class="field"><label for="o-img">Imatge (URL)</label><input id="o-img" name="image" type="text"></div>
+          </div>
+          <button type="submit" class="btn-primary">CONFIRMAR</button>
+          <button type="button" class="btn-cancel" onclick="toggleForm('organs')">CANCEL·LAR</button>
+        </form>
+      </div>
+      <div class="table-wrapper">
+        <table aria-label="Llista d'organs">
+          <thead><tr><th scope="col">NOM</th><th scope="col">ESTAT / PES</th><th scope="col">PREU</th><th scope="col">STOCK</th><th scope="col">ACCIONS</th></tr></thead>
+          <tbody id="organs-tbody"><tr><td colspan="5" class="loading-msg">&gt; Carregant...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-      <!-- CART SECTION (hidden by default) -->
-      <section id="cart-section" class="section" aria-labelledby="cart-title">
-        <h2 id="cart-title">SHOPPING CART</h2>
-        <div id="cart-container" role="region" aria-live="polite" aria-label="Detalls del carret de compra">
-          <p class="empty-cart">El carret està buit</p>
-        </div>
-        <div class="cart-summary">
-          <p>Total: <strong id="cart-total">$0.00</strong></p>
-          <button id="checkout-btn" class="btn btn-primary" aria-label="Proceed to checkout" disabled>CHECKOUT</button>
-          <button id="clear-cart-btn" class="btn btn-secondary" aria-label="Clear shopping cart" disabled>CLEAR CART</button>
-        </div>
-      </section>
+    <!-- COMANDES -->
+    <section id="orders-section" class="section" hidden aria-labelledby="orders-title">
+      <div class="toolbar">
+        <h2 id="orders-title">Comandes processades</h2>
+        <button class="btn-new" onclick="loadOrders()">REFRESCAR</button>
+      </div>
+      <div class="table-wrapper">
+        <table aria-label="Llista de comandes">
+          <thead><tr><th scope="col">REFERÈNCIA</th><th scope="col">DATA</th><th scope="col">ARTICLES</th><th scope="col">TOTAL</th><th scope="col">DETALL</th></tr></thead>
+          <tbody id="orders-tbody"><tr><td colspan="5" class="loading-msg">&gt; Carregant...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
 
-    </div>
   </main>
 
-  <!-- Notificació accessible (ARIA live region) -->
-  <div id="notification" class="notification" role="status" aria-live="assertive" aria-atomic="true"></div>
-
-  <!-- Modal de quantitat de drogues -->
-  <div id="quantity-modal" class="modal" role="dialog" aria-labelledby="quantity-modal-title" aria-hidden="true">
-    <div class="modal-content">
-      <h3 id="quantity-modal-title">SELECT QUANTITY (GRAMS)</h3>
-      <div id="quantity-modal-body">
-        <div style="margin: 20px 0;">
-          <label for="quantity-input" style="color: #00cc00; display: block; margin-bottom: 10px;">Grams:</label>
-          <input type="number" id="quantity-input" min="1" max="2000" value="10" style="width: 100%; padding: 10px; background: #000000; color: #00cc00; border: 1px solid #00cc00; font-family: 'Courier New', monospace;">
-          <p style="color: #666666; margin-top: 10px; font-size: 0.85em;">Total: <span id="quantity-total">$800.00</span></p>
+  <!-- Modal d'edició -->
+  <div id="edit-modal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <p class="modal-title" id="modal-title">// EDITAR REGISTRE</p>
+      <form id="edit-form" onsubmit="submitEdit(event)">
+        <div id="edit-fields" class="form-grid"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeModal()">CANCEL·LAR</button>
+          <button type="submit" class="btn-primary">GUARDAR</button>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button class="btn btn-primary" onclick="confirmQuantity()" style="flex: 1;">CONFIRM</button>
-          <button class="btn btn-secondary" onclick="closeQuantityModal()" style="flex: 1;">CANCEL</button>
-        </div>
-      </div>
+      </form>
     </div>
   </div>
 
-  <footer role="contentinfo" class="footer">
-    <div class="container">
-      <p>&copy; 2026 Dark Web Market. Simulació educativa. Tots els drets reservats.</p>
-    </div>
-  </footer>
+  <div id="notification" class="notification" role="status" aria-live="assertive" aria-atomic="true"></div>
 
   <script src="/app.js"></script>
 </body>

@@ -1,0 +1,12 @@
+<div class="notif-container" aria-live="assertive" aria-atomic="false">
+  @for (n of notifService.notifications(); track n.id) {
+    <div
+      class="notif"
+      [class.success]="n.type === 'success'"
+      [class.error]="n.type === 'error'"
+      role="alert"
+    >
+      {{ n.message }}
+    </div>
+  }
+</div>

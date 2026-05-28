@@ -1,0 +1,46 @@
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #020202;
+  border-bottom: 1px solid #1a0000;
+}
+
+.site-title {
+  margin: 0;
+  padding: 1rem 2rem 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #cc0000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+
+.site-title span {
+  color: #440000;
+}
+
+main {
+  min-height: calc(100vh - 110px);
+}
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  background: #cc0000;
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 9999;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}

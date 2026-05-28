@@ -1,0 +1,72 @@
+<section aria-labelledby="section-title">
+  <div class="toolbar">
+    <h2 id="section-title">{{ categoryTitle }}</h2>
+  </div>
+
+  @if (loading()) {
+    <p class="status-msg" aria-live="polite">Carregant productes...</p>
+  } @else if (items().length === 0) {
+    <p class="status-msg">No hi ha productes en aquesta categoria.</p>
+  } @else {
+    <div class="table-wrapper" role="region" [attr.aria-label]="categoryTitle + ' disponibles'">
+      <table>
+        <caption class="sr-only">Llista de {{ categoryTitle }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Nom</th>
+            @switch (category()) {
+              @case ('weapons') {
+                <th scope="col">Mida</th>
+                <th scope="col">Tipus bala</th>
+                <th scope="col">Preu</th>
+              }
+              @case ('drugs') {
+                <th scope="col">Preu/gram</th>
+                <th scope="col">Màx grams</th>
+              }
+              @case ('organs') {
+                <th scope="col">Estat salut</th>
+                <th scope="col">Preu</th>
+              }
+            }
+            <th scope="col">Stock</th>
+            <th scope="col">Acció</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              @switch (category()) {
+                @case ('weapons') {
+                  <td>{{ $any(item).size }}</td>
+                  <td>{{ $any(item).bullet_type }}</td>
+                  <td>{{ $any(item).price | currency:'EUR':'symbol':'1.2-2' }}</td>
+                }
+                @case ('drugs') {
+                  <td>{{ $any(item).price_per_gram | currency:'EUR':'symbol':'1.2-2' }}/g</td>
+                  <td>{{ $any(item).max_grams }}g</td>
+                }
+                @case ('organs') {
+                  <td>{{ $any(item).health_status }}</td>
+                  <td>{{ $any(item).price | currency:'EUR':'symbol':'1.2-2' }}</td>
+                }
+              }
+              <td [class.no-stock]="item.stock <= 0">{{ item.stock <= 0 ? 'SENSE ESTOC' : item.stock }}</td>
+              <td class="actions">
+                <button
+                  class="btn-cart"
+                  (click)="addToCart(item)"
+                  [disabled]="item.stock <= 0"
+                  [attr.aria-label]="'Afegir ' + item.name + ' al carrito'"
+                >
+                  AFEGIR
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

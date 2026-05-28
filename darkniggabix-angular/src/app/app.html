@@ -1,0 +1,17 @@
+<a href="#main-content" class="skip-link">Saltar al contingut principal</a>
+
+<header>
+  <p class="site-title"><span>[</span> DARKNIGGABIX <span>]</span> &mdash; MERCAT CLANDESTI</p>
+  <app-nav [activeTab]="activeTab()" (tabChange)="setTab($event)" />
+</header>
+
+<app-notification />
+
+<main id="main-content" tabindex="-1">
+  @switch (activeTab()) {
+    @case ('weapons') { <app-products-section category="weapons" /> }
+    @case ('drugs')   { <app-products-section category="drugs" /> }
+    @case ('organs')  { <app-products-section category="organs" /> }
+    @case ('cart')    { <app-cart /> }
+  }
+</main>

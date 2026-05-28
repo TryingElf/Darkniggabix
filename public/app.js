@@ -1,368 +1,264 @@
-// ============================================
-// DARK WEB MARKET - Frontend Application
-// Accessible & WCAG 2.1 Level AA Compliant
-// ============================================
+const API = 'http://localhost:3000/api/products';
 
-const API_BASE = 'http://localhost:3000/api/products';
+const FIELDS = {
+  weapons: [
+    { name: 'name',        label: 'Nom',         type: 'text',   required: true },
+    { name: 'size',        label: 'Mida',         type: 'text',   required: true },
+    { name: 'bullet_type', label: 'Tipus bala',   type: 'text',   required: true },
+    { name: 'price',       label: 'Preu (€)',     type: 'number', required: true, step: '0.01', min: '0.01' },
+    { name: 'stock',       label: 'Stock',        type: 'number', required: true, min: '0' },
+    { name: 'image',       label: 'Imatge (URL)', type: 'text' },
+  ],
+  drugs: [
+    { name: 'name',          label: 'Nom',          type: 'text',   required: true },
+    { name: 'description',   label: 'Descripció',   type: 'text' },
+    { name: 'price_per_gram',label: 'Preu/gram (€)',type: 'number', required: true, step: '0.01', min: '0.01' },
+    { name: 'max_grams',     label: 'Màxim grams',  type: 'number', required: true, min: '1' },
+    { name: 'stock',         label: 'Stock',        type: 'number', required: true, min: '0' },
+    { name: 'image',         label: 'Imatge (URL)', type: 'text' },
+  ],
+  organs: [
+    { name: 'name',          label: 'Nom',          type: 'text',   required: true },
+    { name: 'health_status', label: 'Estat salut',  type: 'text',   required: true },
+    { name: 'price',         label: 'Preu (€)',     type: 'number', required: true, step: '0.01', min: '0.01' },
+    { name: 'stock',         label: 'Stock',        type: 'number', required: true, min: '0' },
+    { name: 'weight',        label: 'Pes (kg)',     type: 'number', step: '0.1', min: '0' },
+    { name: 'quantity',      label: 'Quantitat',    type: 'number', min: '1' },
+    { name: 'image',         label: 'Imatge (URL)', type: 'text' },
+  ],
+};
 
-// Global state
-let cart = [];
-let currentSection = 'weapons';
+let editState = { category: null, id: null };
 
-// ============ INITIALIZATION ============
+// ── INIT ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  initializeApp();
-  setupEventListeners();
-  loadProducts();
+  setupNav();
+  loadCategory('weapons');
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 });
 
-function initializeApp() {
-  console.log('Dark Web Market initialized');
-  loadCartFromStorage();
-  updateCartUI();
-}
-
-function setupEventListeners() {
-  // Section navigation
+// ── NAVIGATION ────────────────────────────────────────────
+function setupNav() {
   document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      switchSection(e.target.dataset.section);
-    });
-  });
-
-  // Cart button
-  document.getElementById('cart-btn').addEventListener('click', () => {
-    switchSection('cart');
-  });
-
-  // Checkout & Clear cart
-  document.getElementById('checkout-btn').addEventListener('click', checkout);
-  document.getElementById('clear-cart-btn').addEventListener('click', clearCart);
-
-  // Modal close on ESC
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    btn.addEventListener('click', () => switchSection(btn.dataset.section));
   });
 }
 
-// ============ SECTION SWITCHING ============
 function switchSection(section) {
-  // Hide all sections
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  
-  // Show selected section
-  const sectionId = section === 'cart' ? 'cart-section' : `${section}-section`;
-  document.getElementById(sectionId).classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.hidden = true);
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    const active = b.dataset.section === section;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-selected', active);
+  });
+  document.getElementById(`${section}-section`).hidden = false;
 
-  // Update nav buttons
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  
-  if (section !== 'cart') {
-    const activeBtn = document.querySelector(`[data-section="${section}"]`);
-    if (activeBtn) {
-      activeBtn.classList.add('active');
-    }
-    currentSection = section;
-  } else {
-    // Mark cart button as active
-    document.getElementById('cart-btn').classList.add('active');
-  }
-
-  // Load cart if switching to cart
-  if (section === 'cart') {
-    renderCart();
-  }
+  if (section === 'orders') loadOrders();
+  else loadCategory(section);
 }
 
-// ============ FETCH PRODUCTS ============
-async function loadProducts() {
+// ── ADD FORM TOGGLE ───────────────────────────────────────
+function toggleForm(category) {
+  const form = document.getElementById(`${category}-form`);
+  const btn  = document.querySelector(`[aria-controls="${category}-form"]`);
+  const hidden = !form.hidden;
+  form.hidden = hidden;
+  btn.setAttribute('aria-expanded', !hidden);
+  if (hidden) form.querySelector('form').reset();
+}
+
+// ── LOAD & RENDER ─────────────────────────────────────────
+async function loadCategory(category) {
   try {
-    await Promise.all([
-      loadWeapons(),
-      loadDrugs(),
-      loadOrgans()
-    ]);
-  } catch (error) {
-    showNotification('Error al carregar productes', 'error');
-    console.error(error);
+    const res  = await fetch(`${API}/${category}`);
+    const data = await res.json();
+    renderTable(category, data);
+  } catch {
+    notify('Error carregant dades', 'error');
   }
 }
 
-async function loadWeapons() {
-  try {
-    const response = await fetch(`${API_BASE}/weapons`);
-    const weapons = await response.json();
-    renderProducts('weapons', weapons);
-  } catch (error) {
-    console.error('Error loading weapons:', error);
-  }
-}
-
-async function loadDrugs() {
-  try {
-    const response = await fetch(`${API_BASE}/drugs`);
-    const drugs = await response.json();
-    renderProducts('drugs', drugs);
-  } catch (error) {
-    console.error('Error loading drugs:', error);
-  }
-}
-
-async function loadOrgans() {
-  try {
-    const response = await fetch(`${API_BASE}/organs`);
-    const organs = await response.json();
-    renderProducts('organs', organs);
-  } catch (error) {
-    console.error('Error loading organs:', error);
-  }
-}
-
-// ============ RENDER PRODUCTS ============
-function renderProducts(category, products) {
-  const containerId = `${category}-container`;
-  const container = document.getElementById(containerId);
-  
-  if (!products || products.length === 0) {
-    container.innerHTML = '<p>No hay productos disponibles</p>';
+function renderTable(category, items) {
+  const tbody = document.getElementById(`${category}-tbody`);
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">&gt; Cap registre trobat.</td></tr>`;
     return;
   }
-
-  container.innerHTML = products.map(product => {
-    return createProductCard(category, product);
-  }).join('');
-
-  // Attach event listeners
-  container.querySelectorAll('.btn-add-cart').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const productId = e.target.dataset.id;
-      const product = products.find(p => p.id == productId);
-      addToCart(category, product);
-    });
-  });
+  tbody.innerHTML = items.map(item => buildRow(category, item)).join('');
 }
 
-function createProductCard(category, product) {
-  let specs = '';
-  let price = product.price || product.price_per_gram || 0;
-
+function buildRow(category, item) {
+  let specs = '', price = '';
   if (category === 'weapons') {
-    specs = `<p><strong>Caliber:</strong> ${product.size}</p>
-             <p><strong>Ammunition:</strong> ${product.bullet_type}</p>`;
+    specs = `${esc(item.size)} / ${esc(item.bullet_type)}`;
+    price = fmt(item.price);
   } else if (category === 'drugs') {
-    specs = `<p><strong>Description:</strong> ${product.description}</p>
-             <p><strong>Price:</strong> $${product.price_per_gram}/g</p>`;
-    price = product.price_per_gram;
-  } else if (category === 'organs') {
-    specs = `<p><strong>Quantity:</strong> ${product.quantity}</p>
-             <p><strong>Weight:</strong> ${product.weight}kg</p>
-             <p><strong>Status:</strong> ${product.health_status}</p>`;
+    specs = esc(item.description || '—');
+    price = `${fmt(item.price_per_gram)}/g`;
+  } else {
+    specs = `${esc(item.health_status)} / ${item.weight ?? '—'}kg`;
+    price = fmt(item.price);
   }
 
+  const itemJson = esc(JSON.stringify(item));
   return `
-    <div class="product-card" role="article">
-      <div class="product-image" aria-label="Image of ${product.name}">[ITEM]</div>
-      <div class="product-info">
-        <h3 class="product-name">${escapeHtml(product.name)}</h3>
-        <div class="product-specs">${specs}</div>
-        <div class="product-price">$${price.toFixed(2)}</div>
-        <div class="product-actions">
-          <button class="btn btn-primary btn-add-cart" 
-                  data-id="${product.id}"
-                  data-category="${category}"
-                  aria-label="Add ${product.name} to cart">
-            ADD TO CART
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
+    <tr>
+      <td class="col-name">${esc(item.name)}</td>
+      <td class="col-specs">${specs}</td>
+      <td class="col-price">${price}</td>
+      <td class="col-stock">${item.stock}</td>
+      <td class="col-actions">
+        <button class="btn-edit" onclick='openEditModal("${category}", ${JSON.stringify(item)})' aria-label="Editar ${esc(item.name)}">EDITAR</button>
+        <button class="btn-del"  onclick="deleteProduct('${category}',${item.id},'${esc(item.name)}')" aria-label="Eliminar ${esc(item.name)}">ELIMINAR</button>
+      </td>
+    </tr>`;
 }
 
-// ============ CART MANAGEMENT ============
-function addToCart(category, product) {
-  let quantity = 1;
+// ── ADD PRODUCT ───────────────────────────────────────────
+async function submitAdd(e, category) {
+  e.preventDefault();
+  const form = e.target;
+  const body = {};
+  new FormData(form).forEach((v, k) => { if (v !== '') body[k] = isNaN(v) || v === '' ? v : Number(v); });
 
-  // Special handling for drugs (grams selector)
-  if (category === 'drugs') {
-    quantity = prompt(`¿Cuántos gramos de ${product.name}?`, '10');
-    if (!quantity) return;
-    quantity = parseFloat(quantity);
-    if (isNaN(quantity) || quantity <= 0) {
-      showNotification('Cantidad inválida', 'error');
+  try {
+    const res = await fetch(`${API}/${category}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+    notify(`${body.name} afegit correctament`, 'success');
+    form.reset();
+    toggleForm(category);
+    loadCategory(category);
+  } catch (err) {
+    notify(err.message || 'Error afegint el registre', 'error');
+  }
+}
+
+// ── DELETE ────────────────────────────────────────────────
+async function deleteProduct(category, id, name) {
+  if (!confirm(`Eliminar "${name}"?\nAquesta acció no es pot desfer.`)) return;
+  try {
+    const res = await fetch(`${API}/${category}/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error();
+    notify(`${name} eliminat`, 'success');
+    loadCategory(category);
+  } catch {
+    notify('Error eliminant el registre', 'error');
+  }
+}
+
+// ── EDIT MODAL ────────────────────────────────────────────
+function openEditModal(category, item) {
+  editState = { category, id: item.id };
+  const container = document.getElementById('edit-fields');
+  container.innerHTML = FIELDS[category].map(f => `
+    <div class="field">
+      <label for="edit-${f.name}">${f.label}${f.required ? ' *' : ''}</label>
+      <input id="edit-${f.name}" name="${f.name}" type="${f.type}"
+        ${f.step   ? `step="${f.step}"`   : ''}
+        ${f.min    ? `min="${f.min}"`     : ''}
+        ${f.required ? 'required' : ''}
+        value="${esc(String(item[f.name] ?? ''))}" >
+    </div>`).join('');
+
+  document.getElementById('edit-modal').hidden = false;
+  document.getElementById('edit-fields').querySelector('input')?.focus();
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').hidden = true;
+  editState = { category: null, id: null };
+}
+
+async function submitEdit(e) {
+  e.preventDefault();
+  const { category, id } = editState;
+  const body = {};
+  new FormData(e.target).forEach((v, k) => { if (v !== '') body[k] = isNaN(v) || v === '' ? v : Number(v); });
+
+  try {
+    const res = await fetch(`${API}/${category}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+    notify(`Registre actualitzat`, 'success');
+    closeModal();
+    loadCategory(category);
+  } catch (err) {
+    notify(err.message || 'Error actualitzant el registre', 'error');
+  }
+}
+
+// ── ORDERS ────────────────────────────────────────────────
+async function loadOrders() {
+  try {
+    const res    = await fetch(`${API}/orders`);
+    const orders = await res.json();
+    const tbody  = document.getElementById('orders-tbody');
+
+    if (!orders.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">&gt; Cap comanda registrada.</td></tr>`;
       return;
     }
-  }
 
-  const cartItem = {
-    id: Date.now(),
-    category: category,
-    product_id: product.id,
-    product_name: product.name,
-    quantity: quantity,
-    unit_price: category === 'drugs' ? product.price_per_gram : product.price,
-    total_price: quantity * (category === 'drugs' ? product.price_per_gram : product.price)
-  };
-
-  cart.push(cartItem);
-  saveCartToStorage();
-  updateCartUI();
-  showNotification(`[+] ${product.name} added to cart`, 'success');
-}
-
-function removeFromCart(itemId) {
-  cart = cart.filter(item => item.id !== itemId);
-  saveCartToStorage();
-  updateCartUI();
-  renderCart();
-  showNotification('[-] Product removed from cart', 'success');
-}
-
-function clearCart() {
-  if (confirm('Are you sure you want to clear the cart?')) {
-    cart = [];
-    saveCartToStorage();
-    updateCartUI();
-    renderCart();
-    showNotification('Cart cleared', 'success');
+    tbody.innerHTML = orders.map(o => {
+      const date = new Date(o.created_at).toLocaleString('ca');
+      return `
+        <tr>
+          <td class="col-ref">${esc(o.ref)}</td>
+          <td>${date}</td>
+          <td>${o.items.length}</td>
+          <td class="col-price">${fmt(o.total)}</td>
+          <td><button class="btn-edit" onclick="toggleOrderDetail(${o.id})" aria-expanded="false" aria-controls="order-detail-${o.id}">DETALL</button></td>
+        </tr>
+        <tr id="order-detail-${o.id}" hidden>
+          <td colspan="5">
+            <table class="detail-table" aria-label="Articles de la comanda ${esc(o.ref)}">
+              <thead><tr><th scope="col">Producte</th><th scope="col">Categoria</th><th scope="col">Qtd</th><th scope="col">Preu unit.</th><th scope="col">Total</th></tr></thead>
+              <tbody>${o.items.map(i => `
+                <tr>
+                  <td>${esc(i.product_name)}</td>
+                  <td class="col-specs">${esc(i.category)}</td>
+                  <td>${i.quantity}</td>
+                  <td>${fmt(i.unit_price)}</td>
+                  <td>${fmt(i.total_price)}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </td>
+        </tr>`;
+    }).join('');
+  } catch {
+    notify('Error carregant les comandes', 'error');
   }
 }
 
-function renderCart() {
-  const cartContainer = document.getElementById('cart-container');
-  
-  if (cart.length === 0) {
-    cartContainer.innerHTML = '<p class="empty-cart">[CART EMPTY]</p>';
-    document.getElementById('checkout-btn').disabled = true;
-    document.getElementById('clear-cart-btn').disabled = true;
-    return;
-  }
-
-  let cartHTML = '<div class="cart-items">';
-  let total = 0;
-
-  cart.forEach(item => {
-    total += item.total_price;
-    const quantityLabel = item.category === 'drugs' ? 'g' : 'ud.';
-    
-    cartHTML += `
-      <div class="cart-item" role="article">
-        <div class="cart-item-info">
-          <div class="cart-item-name">${escapeHtml(item.product_name)}</div>
-          <div class="cart-item-details">
-            ${item.quantity}${quantityLabel} × $${item.unit_price.toFixed(2)} = $${item.total_price.toFixed(2)}
-          </div>
-        </div>
-        <div class="cart-item-price">$${item.total_price.toFixed(2)}</div>
-        <button class="btn btn-small btn-secondary" 
-                aria-label="Remove ${item.product_name} from cart"
-                onclick="removeFromCart(${item.id})">
-          [X] REMOVE
-        </button>
-      </div>
-    `;
-  });
-
-  cartHTML += '</div>';
-  cartContainer.innerHTML = cartHTML;
-
-  // Update total
-  document.getElementById('cart-total').textContent = '$' + total.toFixed(2);
-
-  // Enable checkout buttons
-  document.getElementById('checkout-btn').disabled = false;
-  document.getElementById('clear-cart-btn').disabled = false;
+function toggleOrderDetail(id) {
+  const row = document.getElementById(`order-detail-${id}`);
+  const btn = row.previousElementSibling.querySelector('button');
+  row.hidden = !row.hidden;
+  btn.setAttribute('aria-expanded', !row.hidden);
+  btn.textContent = row.hidden ? 'DETALL' : 'TANCAR';
 }
 
-function updateCartUI() {
-  const cartCount = document.getElementById('cart-count');
-  const cartBtn = document.getElementById('cart-btn');
-  
-  cartCount.textContent = cart.length;
-  cartBtn.setAttribute('aria-label', `Abrir carrito de compra (${cart.length} items)`);
+// ── HELPERS ───────────────────────────────────────────────
+function fmt(n) {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n);
 }
 
-// ============ CHECKOUT ============
-function checkout() {
-  if (cart.length === 0) {
-    showNotification('Cart is empty', 'error');
-    return;
-  }
-
-  const total = cart.reduce((sum, item) => sum + item.total_price, 0);
-  const confirmation = confirm(
-    `Confirm purchase: $${total.toFixed(2)}?\n\nItems: ${cart.length}`
-  );
-
-  if (confirmation) {
-    // Simular envío al servidor
-    setTimeout(() => {
-      showNotification('[✓] Transaction completed. Secure transfer confirmed.', 'success');
-      cart = [];
-      saveCartToStorage();
-      updateCartUI();
-      switchSection('weapons');
-      renderCart();
-    }, 1000);
-  }
+function esc(text) {
+  return String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
 
-// ============ STORAGE ============
-function saveCartToStorage() {
-  localStorage.setItem('darkwebCart', JSON.stringify(cart));
+function notify(msg, type = 'info') {
+  const el = document.getElementById('notification');
+  el.textContent = msg;
+  el.className = `notification ${type} show`;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 3500);
 }
-
-function loadCartFromStorage() {
-  const saved = localStorage.getItem('darkwebCart');
-  cart = saved ? JSON.parse(saved) : [];
-}
-
-// ============ NOTIFICATIONS ============
-function showNotification(message, type = 'info') {
-  const notification = document.getElementById('notification');
-  
-  notification.textContent = message;
-  notification.className = `notification ${type} show`;
-  
-  // Add accessibility announcement
-  notification.setAttribute('role', 'status');
-  notification.setAttribute('aria-live', 'assertive');
-  
-  setTimeout(() => {
-    notification.classList.remove('show');
-  }, 3000);
-}
-
-// ============ MODAL ============
-function closeModal() {
-  const modal = document.getElementById('product-modal');
-  modal.classList.remove('active');
-  modal.setAttribute('aria-hidden', 'true');
-}
-
-// ============ UTILITIES ============
-function escapeHtml(text) {
-  const map = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  return text.replace(/[&<>"']/g, m => map[m]);
-}
-
-// ============ KEYBOARD NAVIGATION ============
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft') {
-    const prevBtn = document.querySelector('.nav-btn.active')?.previousElementSibling;
-    if (prevBtn && prevBtn.classList.contains('nav-btn')) {
-      prevBtn.click();
-    }
-  } else if (e.key === 'ArrowRight') {
-    const nextBtn = document.querySelector('.nav-btn.active')?.nextElementSibling;
-    if (nextBtn && nextBtn.classList.contains('nav-btn')) {
-      nextBtn.click();
-    }
-  }
-});

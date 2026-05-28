@@ -59,3 +59,11 @@ typings/
 
 # next.js build output
 .next
+
+# SQLite database (runtime data)
+*.db
+
+# Angular frontend
+darkniggabix-angular/node_modules/
+darkniggabix-angular/dist/
+darkniggabix-angular/.angular/

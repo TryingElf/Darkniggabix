@@ -69,6 +69,17 @@ function initializeDatabase() {
     )
   `);
 
+  // Taula de COMANDES
+  db.run(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ref TEXT NOT NULL,
+      total REAL NOT NULL,
+      items_json TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // Inserir dades de prova
   insertSampleData();
 }
