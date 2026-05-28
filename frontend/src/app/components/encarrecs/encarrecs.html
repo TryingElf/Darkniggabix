@@ -1,0 +1,130 @@
+<section aria-labelledby="encarrecs-title">
+  <div class="toolbar">
+    <h2 id="encarrecs-title">Els meus encàrrecs</h2>
+    <button
+      class="btn-primary"
+      (click)="showForm.set(!showForm())"
+      [attr.aria-expanded]="showForm()"
+      aria-controls="encarrec-form"
+    >
+      {{ showForm() ? '// TANCAR' : '+ NOU ENCÀRREC' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <div id="encarrec-form" class="form-card">
+      <p class="form-intro">Sol·licita un producte que no trobes al catàleg. Ens posarem en contacte.</p>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate aria-label="Formulari d'encàrrec especial">
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="e-producte">Producte sol·licitat *</label>
+            <input id="e-producte" formControlName="producte" type="text"
+              placeholder="ex: RPG-7, Fentanil..."
+              [attr.aria-invalid]="fi('producte')"
+              aria-describedby="e-producte-err" />
+            @if (fi('producte')) {
+              <span id="e-producte-err" class="field-error" role="alert">Indica el producte que vols</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-cat">Categoria *</label>
+            <select id="e-cat" formControlName="categoria"
+              [attr.aria-invalid]="fi('categoria')"
+              aria-describedby="e-cat-err">
+              <option value="">-- Selecciona --</option>
+              <option value="weapons">Armes</option>
+              <option value="drugs">Drogues</option>
+              <option value="organs">Organs</option>
+            </select>
+            @if (fi('categoria')) {
+              <span id="e-cat-err" class="field-error" role="alert">Selecciona una categoria</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-qty">Quantitat *</label>
+            <input id="e-qty" formControlName="quantitat" type="number" min="1"
+              [attr.aria-invalid]="fi('quantitat')"
+              aria-describedby="e-qty-err" />
+            @if (fi('quantitat')) {
+              <span id="e-qty-err" class="field-error" role="alert">Mínim 1 unitat</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-email">Email de contacte *</label>
+            <input id="e-email" formControlName="email" type="email"
+              placeholder="ex: anonimo@proton.me"
+              [attr.aria-invalid]="fi('email')"
+              aria-describedby="e-email-err" />
+            @if (fi('email')) {
+              <span id="e-email-err" class="field-error" role="alert">
+                @if (form.get('email')?.errors?.['required']) { L'email és obligatori }
+                @else { Format d'email invàlid }
+              </span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-pres">Pressupost màxim (€)</label>
+            <input id="e-pres" formControlName="pressupost" type="number" min="0" step="100"
+              placeholder="Opcional" />
+          </div>
+
+          <div class="field field-wide">
+            <label for="e-notes">Notes addicionals</label>
+            <input id="e-notes" formControlName="notes" type="text"
+              placeholder="Urgència, condicions, altres detalls..." />
+          </div>
+
+        </div>
+        <button type="submit" class="btn-primary">ENVIAR ENCÀRREC</button>
+        <button type="button" class="btn-cancel" (click)="showForm.set(false)">CANCEL·LAR</button>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="status-msg" aria-live="polite">Carregant encàrrecs...</p>
+  } @else if (items().length === 0) {
+    <p class="status-msg">No tens cap encàrrec actiu.</p>
+  } @else {
+    <div class="table-wrapper" role="region" aria-label="Els teus encàrrecs">
+      <table>
+        <caption class="sr-only">Llista d'encàrrecs especials</caption>
+        <thead>
+          <tr>
+            <th scope="col">Producte</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Quantitat</th>
+            <th scope="col">Pressupost</th>
+            <th scope="col">Estat</th>
+            <th scope="col">Acció</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td class="col-name">{{ item.producte }}</td>
+              <td class="col-cat">{{ catLabel(item.categoria) }}</td>
+              <td>{{ item.quantitat }}</td>
+              <td class="col-price">{{ item.pressupost ? (item.pressupost + ' €') : '—' }}</td>
+              <td><span class="badge badge-pendent">{{ item.estat }}</span></td>
+              <td>
+                <button
+                  class="btn-danger"
+                  (click)="delete(item.id, item.producte)"
+                  [attr.aria-label]="'Cancel·lar encàrrec de ' + item.producte"
+                >
+                  CANCEL·LAR
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

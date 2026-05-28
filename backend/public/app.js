@@ -54,6 +54,7 @@ function switchSection(section) {
   document.getElementById(`${section}-section`).hidden = false;
 
   if (section === 'orders') loadOrders();
+  else if (section === 'encarrecs') loadEncarrecs();
   else loadCategory(section);
 }
 
@@ -191,6 +192,87 @@ async function submitEdit(e) {
     loadCategory(category);
   } catch (err) {
     notify(err.message || 'Error actualitzant el registre', 'error');
+  }
+}
+
+// ── ENCARRECS ─────────────────────────────────────────────
+const ESTATS = ['pendent', 'acceptat', 'en_gestio', 'enviat', 'tancat', 'rebutjat'];
+const ESTAT_LABELS = {
+  pendent:   'PENDENT',
+  acceptat:  'ACCEPTAT',
+  en_gestio: 'EN GESTIÓ',
+  enviat:    'ENVIAT',
+  tancat:    'TANCAT',
+  rebutjat:  'REBUTJAT',
+};
+
+async function loadEncarrecs() {
+  try {
+    const res       = await fetch('http://localhost:3000/api/encarrecs');
+    const encarrecs = await res.json();
+    const tbody     = document.getElementById('encarrecs-tbody');
+
+    if (!encarrecs.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-msg">&gt; Cap encàrrec rebut.</td></tr>`;
+      return;
+    }
+
+    const catLabel = { weapons: 'ARMES', drugs: 'DROGUES', organs: 'ORGANS' };
+
+    tbody.innerHTML = encarrecs.map(e => {
+      const opts = ESTATS.map(s =>
+        `<option value="${s}" ${e.estat === s ? 'selected' : ''}>${ESTAT_LABELS[s]}</option>`
+      ).join('');
+      return `
+        <tr id="encarrec-row-${e.id}">
+          <td class="col-name">${esc(e.producte)}</td>
+          <td class="col-specs">${catLabel[e.categoria] ?? esc(e.categoria)}</td>
+          <td>${e.quantitat}</td>
+          <td class="col-price">${e.pressupost ? e.pressupost + ' €' : '—'}</td>
+          <td class="col-specs">${esc(e.email)}</td>
+          <td class="col-specs">${e.notes ? esc(e.notes) : '—'}</td>
+          <td>
+            <span id="badge-${e.id}" class="badge-estat estat-${e.estat}">${ESTAT_LABELS[e.estat]}</span>
+          </td>
+          <td class="col-actions">
+            <select id="sel-${e.id}" class="estat-select" aria-label="Canviar estat de ${esc(e.producte)}">${opts}</select>
+            <button class="btn-edit" onclick="updateEstat(${e.id})" aria-label="Guardar estat de ${esc(e.producte)}">GUARDAR</button>
+            <button class="btn-del"  onclick="deleteEncarrec(${e.id},'${esc(e.producte)}')" aria-label="Eliminar encàrrec de ${esc(e.producte)}">ELIMINAR</button>
+          </td>
+        </tr>`;
+    }).join('');
+  } catch {
+    notify('Error carregant els encàrrecs', 'error');
+  }
+}
+
+async function updateEstat(id) {
+  const nouEstat = document.getElementById(`sel-${id}`).value;
+  try {
+    const res = await fetch(`http://localhost:3000/api/encarrecs/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estat: nouEstat }),
+    });
+    if (!res.ok) throw new Error();
+    const badge = document.getElementById(`badge-${id}`);
+    badge.textContent = ESTAT_LABELS[nouEstat];
+    badge.className   = `badge-estat estat-${nouEstat}`;
+    notify(`Estat actualitzat: ${ESTAT_LABELS[nouEstat]}`, 'success');
+  } catch {
+    notify("Error actualitzant l'estat", 'error');
+  }
+}
+
+async function deleteEncarrec(id, producte) {
+  if (!confirm(`Eliminar l'encàrrec "${producte}"?`)) return;
+  try {
+    const res = await fetch(`http://localhost:3000/api/encarrecs/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error();
+    document.getElementById(`encarrec-row-${id}`)?.remove();
+    notify('Encàrrec eliminat', 'success');
+  } catch {
+    notify("Error eliminant l'encàrrec", 'error');
   }
 }
 

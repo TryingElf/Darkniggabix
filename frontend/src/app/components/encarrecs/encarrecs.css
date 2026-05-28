@@ -1,0 +1,111 @@
+section { padding: 1.5rem 2rem; }
+
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid #1a0000;
+}
+
+h2 {
+  margin: 0; font-size: 1rem; color: #cc0000;
+  text-transform: uppercase; letter-spacing: 0.2em; font-weight: bold;
+}
+h2::before { content: '// '; color: #440000; }
+
+.status-msg {
+  color: #444; font-size: 0.85rem; letter-spacing: 0.08em; margin-top: 1.5rem;
+}
+.status-msg::before { content: '> '; color: #cc0000; }
+
+.form-intro {
+  margin: 0 0 1.2rem; color: #444; font-size: 0.8rem; letter-spacing: 0.06em;
+}
+.form-intro::before { content: '// '; color: #330000; }
+
+.form-card {
+  background: #080808; border: 1px solid #220000;
+  border-left: 3px solid #cc0000; padding: 1.5rem; margin-bottom: 1.5rem;
+}
+
+.form-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem; margin-bottom: 1rem;
+}
+
+.field { display: flex; flex-direction: column; gap: 0.3rem; }
+.field-wide { grid-column: 1 / -1; }
+
+label {
+  font-size: 0.75rem; color: #555; font-weight: bold;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+input[type="text"], input[type="email"], input[type="number"], select {
+  padding: 0.5rem 0.75rem; background: #060606; border: 1px solid #222;
+  border-radius: 0; color: #ccc; font-size: 0.9rem;
+  font-family: 'Courier New', monospace; transition: border-color 0.15s;
+}
+input::placeholder { color: #333; }
+input:focus, select:focus { outline: none; border-color: #cc0000; background: #0a0000; }
+select { cursor: pointer; }
+select option { background: #080808; }
+input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #660000; }
+
+.field-error {
+  font-size: 0.75rem; color: #880000; letter-spacing: 0.05em;
+}
+.field-error::before { content: '! '; }
+
+.btn-primary {
+  padding: 0.5rem 1.2rem; background: #cc0000; color: #fff;
+  border: none; border-radius: 0; font-size: 0.75rem;
+  font-family: 'Courier New', monospace; font-weight: bold;
+  letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+  transition: background 0.15s; margin-right: 0.5rem;
+}
+.btn-primary:hover { background: #990000; }
+.btn-primary:focus-visible { outline: 2px solid #cc0000; outline-offset: 2px; }
+
+.btn-cancel {
+  padding: 0.5rem 1.2rem; background: transparent; color: #555;
+  border: 1px solid #333; border-radius: 0; font-size: 0.75rem;
+  font-family: 'Courier New', monospace; font-weight: bold;
+  letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+}
+.btn-cancel:hover { color: #888; border-color: #555; }
+.btn-cancel:focus-visible { outline: 2px solid #cc0000; outline-offset: 2px; }
+
+.btn-danger {
+  padding: 0.35rem 0.75rem; background: transparent; color: #550000;
+  border: 1px solid #330000; border-radius: 0; font-size: 0.72rem;
+  font-family: 'Courier New', monospace; font-weight: bold;
+  letter-spacing: 0.1em; cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.btn-danger:hover { background: #1a0000; color: #cc0000; border-color: #660000; }
+.btn-danger:focus-visible { outline: 2px solid #cc0000; outline-offset: 2px; }
+
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { padding: 0.65rem 1rem; text-align: left; border-bottom: 1px solid #0f0f0f; }
+th {
+  background: #060606; color: #440000; font-weight: bold;
+  font-size: 0.72rem; text-transform: uppercase;
+  letter-spacing: 0.15em; border-bottom: 1px solid #220000;
+}
+td { color: #888; }
+tr:hover td { background: #060000; color: #aaa; }
+
+.col-name  { color: #aaa; font-weight: bold; }
+.col-cat   { color: #555; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.col-price { color: #cc0000; }
+
+.badge {
+  padding: 0.15rem 0.5rem; font-size: 0.68rem; font-weight: bold;
+  letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid;
+}
+.badge-pendent { color: #666; border-color: #2a2a2a; background: #080808; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border-width: 0;
+}

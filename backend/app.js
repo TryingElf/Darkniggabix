@@ -7,6 +7,7 @@ var cors = require('cors');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var productsRouter = require('./routes/products');
+var encarrecsRouter = require('./routes/encarrecs');
 
 var app = express();
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/encarrecs', encarrecsRouter);
 
 app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });

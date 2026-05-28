@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 
-export type Tab = 'weapons' | 'drugs' | 'organs' | 'cart';
+export type Tab = 'weapons' | 'drugs' | 'organs' | 'cart' | 'encarrecs';
 
 @Component({
   selector: 'app-nav',
@@ -17,6 +17,7 @@ export class Nav {
     { id: 'drugs',   label: 'DROGUES' },
     { id: 'organs',  label: 'ORGANS' },
     { id: 'cart',    label: 'CARRITO' },
+    { id: 'encarrecs', label: 'ENCÀRRECS' },
   ];
 
   select(tab: Tab): void {

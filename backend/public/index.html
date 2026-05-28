@@ -17,6 +17,7 @@
       <button role="tab" class="nav-btn" data-section="drugs" aria-selected="false">DROGUES</button>
       <button role="tab" class="nav-btn" data-section="organs" aria-selected="false">ORGANS</button>
       <button role="tab" class="nav-btn" data-section="orders" aria-selected="false">COMANDES</button>
+      <button role="tab" class="nav-btn" data-section="encarrecs" aria-selected="false">ENCÀRRECS</button>
     </nav>
   </header>
 
@@ -117,6 +118,31 @@
         <table aria-label="Llista de comandes">
           <thead><tr><th scope="col">REFERÈNCIA</th><th scope="col">DATA</th><th scope="col">ARTICLES</th><th scope="col">TOTAL</th><th scope="col">DETALL</th></tr></thead>
           <tbody id="orders-tbody"><tr><td colspan="5" class="loading-msg">&gt; Carregant...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ENCÀRRECS -->
+    <section id="encarrecs-section" class="section" hidden aria-labelledby="encarrecs-title">
+      <div class="toolbar">
+        <h2 id="encarrecs-title">Encàrrecs especials</h2>
+        <button class="btn-new" onclick="loadEncarrecs()">REFRESCAR</button>
+      </div>
+      <div class="table-wrapper">
+        <table aria-label="Llista d'encàrrecs especials">
+          <thead>
+            <tr>
+              <th scope="col">PRODUCTE</th>
+              <th scope="col">CATEGORIA</th>
+              <th scope="col">QUANTITAT</th>
+              <th scope="col">PRESSUPOST</th>
+              <th scope="col">EMAIL</th>
+              <th scope="col">NOTES</th>
+              <th scope="col">ESTAT</th>
+              <th scope="col">GESTIÓ</th>
+            </tr>
+          </thead>
+          <tbody id="encarrecs-tbody"><tr><td colspan="8" class="loading-msg">&gt; Carregant...</td></tr></tbody>
         </table>
       </div>
     </section>

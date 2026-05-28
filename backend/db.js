@@ -80,6 +80,21 @@ function initializeDatabase() {
     )
   `);
 
+  // Taula d'ENCÀRRECS ESPECIALS
+  db.run(`
+    CREATE TABLE IF NOT EXISTS encarrecs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      producte TEXT NOT NULL,
+      categoria TEXT NOT NULL CHECK(categoria IN ('weapons','drugs','organs')),
+      quantitat INTEGER NOT NULL,
+      email TEXT NOT NULL,
+      pressupost REAL,
+      notes TEXT,
+      estat TEXT NOT NULL DEFAULT 'pendent',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // Inserir dades de prova
   insertSampleData();
 }
@@ -114,8 +129,14 @@ function insertSampleData() {
         ["Heart", 1, 0.3, "Excellent", "organ1.jpg", 50000, 2]);
       db.run("INSERT INTO organs (name, quantity, weight, health_status, image, price, stock) VALUES (?, ?, ?, ?, ?, ?, ?)", 
         ["Kidney", 2, 0.15, "Good", "organ2.jpg", 15000, 5]);
-      db.run("INSERT INTO organs (name, quantity, weight, health_status, image, price, stock) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+      db.run("INSERT INTO organs (name, quantity, weight, health_status, image, price, stock) VALUES (?, ?, ?, ?, ?, ?, ?)",
         ["Liver", 1, 1.5, "Good", "organ3.jpg", 30000, 3]);
+
+      // ENCÀRRECS de mostra
+      db.run("INSERT INTO encarrecs (producte, categoria, quantitat, email, pressupost, notes) VALUES (?, ?, ?, ?, ?, ?)",
+        ["RPG-7", "weapons", 2, "comprador1@proton.me", 8000, "Necessito per dimarts"]);
+      db.run("INSERT INTO encarrecs (producte, categoria, quantitat, email, pressupost, notes) VALUES (?, ?, ?, ?, ?, ?)",
+        ["Fentanil", "drugs", 50, "anonimo@tor.onion", 5000, null]);
     }
   });
 }
